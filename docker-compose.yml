@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    ports:
+        - "5432:5432"
+    expose:
+        - 5432
+    environment:
+       MYSQL_DATABASE: 'ggde-db'
+       MYSQL_USER: 'root'
+       MYSQL_PASSWORD: 'password'
+       MYSQL_ROOT_PASSWORD: 'password'
+       MYSQL_TCP_PORT: 5432
+    network_mode: "host"
+    volumes:
+        - ggde-volume:/var/lib/mysql
+        - "/etc/localtime:/etc/localtime:ro"
+  web:
+    build:
+        context: .
+        dockerfile: ./ggde/DockerFile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+        - .:/ggde
+        - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "8000:8000"
+    network_mode: "host"
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+    environment:
+        MYSQL_DATABASE: 'ggde-db'
+        MYSQL_ROOT_PASSWORD: 'password'
+
+
+volumes:
+    ggde-volume:
