@@ -12,7 +12,7 @@ class Subject(models.Model):
 class Availability(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     weekday = models.IntegerField(validators=[MaxValueValidator(7), MinValueValidator(1)])
-    time = models.IntegerField(validators=[MaxValueValidator(0), MinValueValidator(23)])
+    time = models.IntegerField(validators=[MaxValueValidator(23), MinValueValidator(0)])
 
 
 class Schedule(models.Model):
