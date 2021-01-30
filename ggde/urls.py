@@ -18,7 +18,7 @@ from django.urls import include, path
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path('', include('schedule.urls')),
+    path('', include('ggde.schedule.urls')),
     path('admin/', admin.site.urls),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth')
 ]

@@ -32,7 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'schedule.apps.ScheduleConfig',
+    'ggde',
+    'ggde.schedule',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
