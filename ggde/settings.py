@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import os
 from pathlib import Path
+from ggde.patches import patch_jsonresponse_disable_ensure_ascii
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -132,3 +133,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+JSON_RESPONSES_UTF8 = True
+
+if JSON_RESPONSES_UTF8:
+    patch_jsonresponse_disable_ensure_ascii()
