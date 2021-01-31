@@ -1,14 +1,18 @@
-from functools import reduce
 import math
 
 
 def join_week_days(availabilities):
-    week_availabilities = {}
+    week_availabilities = {
+        'sunday': [],
+        'monday': [],
+        'tuesday': [],
+        'wednesday': [],
+        'thursday': [],
+        'friday': [],
+        'saturday': []
+    }
     for availability in availabilities:
-        if availability['weekday'] in week_availabilities:
-            week_availabilities[availability['weekday']] += ([None] * availability['duration'])
-        else:
-            week_availabilities[availability['weekday']] = [None] * availability['duration']
+        week_availabilities[availability['weekday']] += [{'subject': None, 'time': availability['time']}]
 
     return week_availabilities
 
@@ -16,13 +20,20 @@ def join_week_days(availabilities):
 def prioritize_days(week_slots):
     info = []
     for week_day, slots in week_slots.items():
-        ocup_slots = len(list(filter(lambda slot: slot is not None, slots)))
+        ocup_slots = len(list(filter(lambda slot: slot['subject'] is not None, slots)))
         avail_slots = len(slots) - ocup_slots
-        info.append({
-            'day': week_day,
-            'business_p': 1 / (ocup_slots + 1),
-            'available_p': avail_slots
-        })
+        if avail_slots == 0:
+            info.append({
+                'day': week_day,
+                'business_p': 0,
+                'available_p': 0
+            })
+        else:
+            info.append({
+                'day': week_day,
+                'business_p': 1 / (ocup_slots + 1),
+                'available_p': avail_slots
+            })
 
     info.sort(reverse=True, key=lambda k: (k['business_p'], k['available_p']))
     return [info_i['day'] for info_i in info]
@@ -46,7 +57,7 @@ def is_enough_time(subjects, availabilities):
     for subject in subjects:
         total_hours_needed += subject['hours']
 
-    hours_available = reduce( (lambda x, y: x + y['duration']), availabilities, 0)
+    hours_available = len(availabilities)
     return hours_available >= total_hours_needed
 
 
@@ -55,12 +66,15 @@ def insert_in_slots(subject, sessions, preference, wd_slots):
         day = preference[i]
         first_disponibility = 0
         for j, slot in enumerate(wd_slots[day]):
-            if slot == None:
+            if slot['subject'] == None:
                 first_disponibility = j
                 break
         
         final = first_disponibility + session_duration
-        wd_slots[day][first_disponibility:final] = [subject] * session_duration
+
+        for time in range(first_disponibility, final):
+            wd_slots[day][time]['subject'] = subject
+        # wd_slots[day][first_disponibility:final] = [{'subject': subject}] * session_duration
     
     return wd_slots
 
@@ -69,14 +83,18 @@ def insert_in_slots(subject, sessions, preference, wd_slots):
 def create_schedule(subjects, availabilities):
     """
     subjects: [{title (string), hours (int)}],
-    availabilities: [{weekday (int), duration (int)}]
+    availabilities: [{weekday (int), time (int)}]
     
-    The hours needed are weekly.
+    The hours needed in subject are weekly.
     Weekday is 1 for Sunday, 2 for Monday, and so on.
-    The start_time is measured in minutes since midnight.
-    Duration is measured in hours
+    The time is measured in hours since midnight.
 
-    Returns a schedule.
+    Returns a schedule: {
+        sunday: [{subject: (string), time(int)}],
+        monday: ...
+        # and so on for each day on week
+        # empty days will be empty arrays
+    }.
     """
     if not is_enough_time(subjects, availabilities):
         raise Exception(
@@ -92,14 +110,18 @@ def create_schedule(subjects, availabilities):
     subjects_ordered.sort(reverse=True, key=lambda k: k['hours'])
 
     for subject in subjects_ordered:
-        days_available = len(list(slots for day, slots in sessions_by_wd.items() if None in slots))
+        days_available = len(list(
+            slots for day, slots in sessions_by_wd.items() if any(slot['subject'] == None for slot in slots)
+        ))
         sessions = distribute_by_days(subject['hours'], days_available)
         day_preference = prioritize_days(sessions_by_wd)
         sessions_by_wd = insert_in_slots(subject['title'], sessions, day_preference, sessions_by_wd)
     
+    print(sessions_by_wd)
     return sessions_by_wd
 
 
+# Dev test data:
 subjects = [
     {
         'title': 'Portugues',
@@ -112,42 +134,38 @@ subjects = [
     {
         'title': 'Biologia',
         'hours': 1
-    },
-    {
-        'title': 'Física',
-        'hours': 3
-    },
-    {
-        'title': 'Geografia',
-        'hours': 1
-    },
-    {
-        'title': 'Inglês',
-        'hours': 1
     }
 ]
 
 availabilities = [
-    {
-        'weekday': 2,
-        'duration': 3
-    },
-    {
-        'weekday': 3,
-        'duration': 3
-    },
-    {
-        'weekday': 4,
-        'duration': 2
-    },
-    {
-        'weekday': 6,
-        'duration': 3
-    },
-    {
-        'weekday': 7,
-        'duration': 3
-    }
-]
+        {
+            "weekday": "monday",
+            "time": 15
+        },
+        {
+            "weekday": "monday",
+            "time": 16
+        },
+        {
+            "weekday": "tuesday",
+            "time": 16
+        },
+        {
+            "weekday": "tuesday",
+            "time": 17
+        },
+        {
+            "weekday": "friday",
+            "time": 14
+        },
+        {
+            "weekday": "friday",
+            "time": 15
+        },
+        {
+            "weekday": "friday",
+            "time": 16
+        }
+    ]
 
 schedule = create_schedule(subjects, availabilities)
