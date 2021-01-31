@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 
 
@@ -15,9 +16,10 @@ class UserView(generics.ListCreateAPIView):
         fullname = request.data.get('fullname')
         if not email or not password:
             return JsonResponse(status=500)
-        User.objects.create_user(
+        user = User.objects.create_user(
             username=email,
             email=email,
             password=password
         )
-        return JsonResponse({'KEY': 'OK'})
+        token = Token.objects.create(user=user)
+        return JsonResponse(status=200, data={'token': token.key})
