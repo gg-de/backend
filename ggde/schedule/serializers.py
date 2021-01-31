@@ -1,5 +1,5 @@
 from rest_framework import seriealizers
-from .models import Subject, Availability, Schedule
+from .models import Subject, Schedule
 
 
 class SubjectSerializer(seriealizers.ModelSerializer):
@@ -8,13 +8,7 @@ class SubjectSerializer(seriealizers.ModelSerializer):
         fields = ['owner', 'title', 'week_hours']
 
 
-class AvailabilitySerializer(seriealizers.ModelSerializer):
-    class Meta:
-        model = Availability
-        fields = ['owner', 'week_day', 'time']
-
-
-class SubjectSerializer(seriealizers.ModelSerializer):
+class ScheduleSerializer(seriealizers.ModelSerializer):
     class Meta:
         model = Schedule
-        fields = ['subject', 'time']
+        fields = ['owner', 'week_day', 'time', 'subject']
