@@ -19,6 +19,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('', include('ggde.schedule.urls')),
+    path('user/', include('ggde.user.urls')),
     path('admin/', admin.site.urls),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth')
 ]
