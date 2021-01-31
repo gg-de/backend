@@ -168,4 +168,4 @@ availabilities = [
         }
     ]
 
-schedule = create_schedule(subjects, availabilities)
+# schedule = create_schedule(subjects, availabilities)
