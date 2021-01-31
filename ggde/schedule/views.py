@@ -1,57 +1,20 @@
 from django.http import JsonResponse
 from ggde.utils import create_schedule
+from rest_framework import generics
+from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
 
 
-def index(request):
-    subjects = [
-        {
-            'title': 'Portugues',
-            'hours': 2
-        },
-        {
-            'title': 'Matematica',
-            'hours': 2
-        },
-        {
-            'title': 'Biologia',
-            'hours': 1
-        },
-        {
-            'title': 'Física',
-            'hours': 3
-        },
-        {
-            'title': 'Geografia',
-            'hours': 1
-        },
-        {
-            'title': 'Inglês',
-            'hours': 1
-        }
-    ]
+class ScheduleView(generics.ListCreateAPIView):
+    permission_classes = [AllowAny]
 
-    availabilities = [
-        {
-            'weekday': 2,
-            'duration': 3
-        },
-        {
-            'weekday': 3,
-            'duration': 3
-        },
-        {
-            'weekday': 4,
-            'duration': 2
-        },
-        {
-            'weekday': 6,
-            'duration': 3
-        },
-        {
-            'weekday': 7,
-            'duration': 3
-        }
-    ]
+    @api_view(['POST'])
+    def mount_schedule(request):
+        print(request.data)
 
-    timetable = create_schedule(subjects, availabilities)
-    return JsonResponse(timetable)
+        if request.method == 'POST':
+            return JsonResponse(
+                create_schedule(request.data["subjects"], request.data["availabilities"])
+            )
+        
+        return JsonResponse({'KEY': 'OK'})
